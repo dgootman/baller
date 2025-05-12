@@ -86,16 +86,9 @@ for s in team_info["past_streams"]:
     opposing_team_name = s[f"{opposing_team}_name"]
     points_for = s[f"{our_team}_score"]
     points_against = s[f"{opposing_team}_score"]
-    result = (
-        ":trophy: Won"
-        if points_for > points_against
-        else "Tie"
-        if points_for == points_against
-        else "Lost"
-    )
     is_won = points_for > points_against
 
-    col1, col2 = st.columns([3, 7])
+    col1, col2 = st.columns([2, 8])
     col1.image(s["thumbnail"])
 
     with col2:
@@ -108,16 +101,14 @@ for s in team_info["past_streams"]:
                 f"### [:confounded: :red[{team_name} vs {opposing_team_name}]]({s['link']})"
             )
 
-        col1, col2, _ = st.columns([1, 1, 8])
-        # col1.write(f"## :{'green' if points_for > points_against else 'red'}[{result}]")
-        col1.metric(
+        st.metric(
             "Result", f"{points_for} : {points_against}", label_visibility="collapsed"
         )
 
         @st.fragment
         def load_video(link):
             if st.button("Load video", key=link):
-                game_soup = BeautifulSoup(fetch(link))
+                game_soup = BeautifulSoup(fetch(link), features="html.parser")
 
                 (game_info_div,) = game_soup.select(
                     'div[data-react-class="streams/ShowTypescript"]'
@@ -130,25 +121,23 @@ for s in team_info["past_streams"]:
                     f"""
 <html>
 <head>
-<link href="//vjs.zencdn.net/8.23.3/video-js.min.css" rel="stylesheet">
-<script src="//vjs.zencdn.net/8.23.3/video.min.js"></script>
+    <link href="//vjs.zencdn.net/8.23.3/video-js.min.css" rel="stylesheet">
+    <script src="//vjs.zencdn.net/8.23.3/video.min.js"></script>
 </head>
 <body>
-<video-js id=vid1 width=800 height=600 class="vjs-default-skin" controls>
-    <source
-    src="{video_url}"
-    type="application/x-mpegURL">
-</video-js>
-<script>
-var player = videojs('vid1');
-</script>
+    <video-js id=vid1 width=800 height=600 class="vjs-default-skin" controls>
+        <source
+            src="{video_url}"
+            type="application/x-mpegURL">
+    </video-js>
+    <script>
+        var player = videojs('vid1');
+    </script>
 </body>
 </html>
 """,
                     width=800,
                     height=600,
                 )
-
-                st.write(video_url)
 
         load_video(link)
